@@ -1,0 +1,39 @@
+# 출처: 풀스택 베이스 템플릿 운영 표준 (2026.02~) — Gunicorn 마스터 + UvicornWorker 로 FastAPI 를 띄우는 systemd 유닛 (/etc/systemd/system/fastapi.service)
+# 유닛 파일은 서버에만 있어 운영 값대로 다시 적었다. 옵션마다 이유를 주석으로 남긴다.
+[Unit]
+Description=FastAPI backend (Gunicorn + UvicornWorker)
+After=network.target redis-server.service
+
+[Service]
+User=ubuntu
+Group=ubuntu
+WorkingDirectory=/home/ubuntu/app/backend
+# 가상환경 경로를 PATH 앞에 — uv 로 만든 .venv
+Environment="PATH=/home/ubuntu/app/backend/.venv/bin:/usr/bin"
+# 표준 출력 버퍼링을 끈다 — 죽기 직전 줄이 파일에 남아야 한다
+Environment="PYTHONUNBUFFERED=1"
+
+# --workers 1          : 프로세스 메모리에 두는 세션 · 룸 상태가 있어 워커를 늘리면 불일치가 난다
+# --timeout 0          : SSE · WebSocket 장기 연결. 기본 30초면 워커가 강제 재시작된다
+# --graceful-timeout 0 : 재시작 시 열린 연결을 기다리지 않는다
+# --forwarded-allow-ips="*" : ALB 뒤라 X-Forwarded-Proto 를 믿어야 secure 쿠키 · https 리다이렉트가 맞는다
+# --capture-output     : 워커의 print · stderr 도 마스터의 표준 출력으로 모은다
+ExecStart=/home/ubuntu/app/backend/.venv/bin/gunicorn app.main:app \
+    --worker-class uvicorn.workers.UvicornWorker \
+    --workers 1 \
+    --bind 127.0.0.1:8000 \
+    --timeout 0 \
+    --graceful-timeout 0 \
+    --forwarded-allow-ips="*" \
+    --capture-output \
+    --log-level info
+
+# 앱 로그는 이 파일에 붙여 쓴다. 회전은 logrotate(copytruncate) 가 맡는다
+StandardOutput=append:/var/log/fastapi/fastapi.log
+StandardError=append:/var/log/fastapi/fastapi.log
+
+Restart=always
+RestartSec=3
+
+[Install]
+WantedBy=multi-user.target

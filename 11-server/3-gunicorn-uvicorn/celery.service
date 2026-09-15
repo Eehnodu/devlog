@@ -1,0 +1,31 @@
+# 출처: 풀스택 베이스 템플릿 운영 표준 (2026.02~) — Celery 워커 systemd 유닛 (/etc/systemd/system/celery.service). 웹 유닛과 짝을 이룬다
+# 유닛 파일은 서버에만 있어 운영 값대로 다시 적었다.
+[Unit]
+Description=Celery worker
+# 브로커(Redis) 가 먼저 떠 있어야 한다
+After=network.target redis-server.service
+Requires=redis-server.service
+
+[Service]
+User=ubuntu
+Group=ubuntu
+WorkingDirectory=/home/ubuntu/app/backend
+Environment="PATH=/home/ubuntu/app/backend/.venv/bin:/usr/bin"
+Environment="PYTHONUNBUFFERED=1"
+
+# 동시 실행 수 · 태스크당 시간 제한 · 메모리 상한은 CLI 가 아니라 Celery 설정(worker_concurrency 등)에 둔다
+#   — 이미지 · 음성 생성처럼 외부 API 를 기다리는 작업이라 2~4 로 충분했다
+# --beat : 반복 배치(매일 자정)도 따로 프로세스를 두지 않고 이 워커 안의 스케줄러가 돌린다
+ExecStart=/home/ubuntu/app/backend/.venv/bin/celery -A app.worker.celery worker \
+    --loglevel=INFO \
+    --beat
+
+# 워커 로그는 웹 로그와 다른 파일에
+StandardOutput=append:/var/log/celery/celery.log
+StandardError=append:/var/log/celery/celery.log
+
+Restart=always
+RestartSec=3
+
+[Install]
+WantedBy=multi-user.target

@@ -1,0 +1,25 @@
+# 출처: AI 상담 챗봇 서비스 (Django + FastAPI 계열, 2025.06) — 같은 코드 트리에서 Django(8000) 와 FastAPI(8001) 를 나란히 띄우는 로컬 구성
+# Dockerfile 은 python:3.11 에 requirements 설치 후 코드 전체 복사, 세 줄이 전부였다.
+version: "3.9"
+services:
+  # 관리자 화면 · 위젯 HTML · 카테고리 CRUD
+  django:
+    build: .
+    command: python django/chatbotProject/manage.py runserver 0.0.0.0:8000
+    ports:
+      - "8000:8000"
+    volumes:
+      - .:/app
+    environment:
+      - TZ=Asia/Seoul
+
+  # 대화 응답 생성(SSE 스트리밍) · 대화 로그 추가 — 같은 MySQL 테이블을 SQLAlchemy 로 다룬다
+  fastapi:
+    build: .
+    command: uvicorn fastapi.main:app --host 0.0.0.0 --port 8001
+    ports:
+      - "8001:8001"
+    volumes:
+      - .:/app
+    environment:
+      - TZ=Asia/Seoul
