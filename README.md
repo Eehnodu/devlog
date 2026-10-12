@@ -3,7 +3,7 @@
 2025년 2월 단일 파일 구조의 Django 챗봇에서 2026년 도메인 모듈 구조의 ERP 까지, 같은 성격의 작업을 반복하며 드러난 한계를 하나씩 바꿔 온 과정을 **실제 코드 조각**으로 남긴 저장소입니다.
 주제별로 폴더를 나누고, 폴더 안에 단계마다 그 시기의 코드와 "무엇이 문제였고 어떻게 바꿨는지"를 적었습니다.
 
-글로 정리한 전체 흐름은 노션 포트폴리오의 [성장 과정](https://oil-football-a51.notion.site/3dc0669f896d816ea3d6ca10a9e131d8) 에 있고, 이 저장소는 그 글의 근거가 되는 코드입니다.
+글로 정리한 전체 흐름은 노션의 [성장 과정](https://oil-football-a51.notion.site/3dc0669f896d816ea3d6ca10a9e131d8) 에 있고, 이 저장소는 그 글의 근거가 되는 코드입니다.
 
 ## 읽는 법
 
@@ -42,4 +42,4 @@
 ## 관련 저장소
 
 - [base_template](https://github.com/Eehnodu/base_template) — 위 변천의 결과인 현재 표준 템플릿
-- [home_project](https://github.com/Eehnodu/home_project) — 템플릿으로 만든 포트폴리오 사이트 · AI 챗봇 (홈서버 운영)
+- [home_project](https://github.com/Eehnodu/home_project) — 템플릿으로 만든 개인 소개 사이트 · AI 챗봇 (홈서버 운영)
